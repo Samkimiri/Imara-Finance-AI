@@ -3,5 +3,6 @@ dist
 .env
 .env.local
 .DS_Store
+vite-dev.*.log
 supabase/.branches
 supabase/.temp
