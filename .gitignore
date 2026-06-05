@@ -6,3 +6,4 @@ dist
 vite-dev.*.log
 supabase/.branches
 supabase/.temp
+.vercel
