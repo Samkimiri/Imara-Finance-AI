@@ -329,11 +329,28 @@ function LoanApplication() {
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [draftStatus, setDraftStatus] = useState("");
+  const loanAmounts = [25000, 50000, 100000, 250000];
+  const purposes = ["Buy stock", "Equipment", "Working capital", "Farm inputs"];
+  const completeFields = [
+    form.applicant_name,
+    details.phone,
+    details.national_id,
+    form.location,
+    form.business_type,
+    String(form.loan_amount_kes),
+    String(details.monthly_income),
+    details.loan_purpose,
+    form.mpesa_summary,
+    form.seasonal_pattern
+  ].filter((value) => value.trim().length > 0).length;
+  const completion = Math.round((completeFields / 10) * 100);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
     setSubmitted(false);
+    setDraftStatus("");
     try {
       const data = await invokeAssessment(form).catch(() => ({ assessment: localAssessment(form) }));
       setAssessment(data.assessment ?? data);
@@ -344,6 +361,7 @@ function LoanApplication() {
   }
 
   const affordability = Math.min(92, Math.round((details.monthly_income / Math.max(form.loan_amount_kes, 1)) * 48));
+  const monthlyEstimate = Math.max(1, Math.round((form.loan_amount_kes * 1.12) / Number.parseInt(details.repayment_period, 10)));
 
   return (
     <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
@@ -355,6 +373,15 @@ function LoanApplication() {
           </div>
           <Badge tone="blue">KES application</Badge>
         </div>
+        <div className="mt-5 rounded-card bg-surface-secondary p-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-semibold">Application progress</span>
+            <span className="text-primary-dark">{completion}% complete</span>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-surface">
+            <motion.div animate={{ width: `${completion}%` }} className="h-2 rounded-full bg-primary" />
+          </div>
+        </div>
         <form onSubmit={submit} className="mt-6 grid gap-4 md:grid-cols-2">
           <Input label="Full Name" value={form.applicant_name} onChange={(v) => setForm({ ...form, applicant_name: v })} icon={IdCard} />
           <Input label="Phone Number" value={details.phone} onChange={(phone) => setDetails({ ...details, phone })} icon={Phone} />
@@ -362,18 +389,34 @@ function LoanApplication() {
           <label className="block text-sm font-medium">County<select className="mt-2 w-full rounded-input border border-border px-3 py-3" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}>{counties.map((county) => <option key={county}>{county}</option>)}</select></label>
           <Input label="Business Type" value={form.business_type} onChange={(v) => setForm({ ...form, business_type: v })} icon={Building2} />
           <label className="block text-sm font-medium">Business Age<select className="mt-2 w-full rounded-input border border-border px-3 py-3" value={details.business_age} onChange={(e) => setDetails({ ...details, business_age: e.target.value })}><option>Under 1 year</option><option>1 - 2 years</option><option>2 - 5 years</option><option>Over 5 years</option></select></label>
-          <Input label="Loan Amount Requested (KES)" type="number" value={String(form.loan_amount_kes)} onChange={(v) => setForm({ ...form, loan_amount_kes: Number(v) })} icon={WalletCards} />
+          <div>
+            <Input label="Loan Amount Requested (KES)" type="number" value={String(form.loan_amount_kes)} onChange={(v) => setForm({ ...form, loan_amount_kes: Number(v) })} icon={WalletCards} />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {loanAmounts.map((amount) => <button key={amount} type="button" onClick={() => setForm({ ...form, loan_amount_kes: amount })} className={`rounded-input border px-3 py-2 text-xs font-semibold transition ${form.loan_amount_kes === amount ? "border-primary bg-primary-light text-primary-dark" : "border-border hover:bg-surface-secondary"}`}>KES {amount.toLocaleString()}</button>)}
+            </div>
+          </div>
           <Input label="Average Monthly Income (KES)" type="number" value={String(details.monthly_income)} onChange={(monthly_income) => setDetails({ ...details, monthly_income: Number(monthly_income) })} icon={Banknote} />
           <label className="block text-sm font-medium">Repayment Period<select className="mt-2 w-full rounded-input border border-border px-3 py-3" value={details.repayment_period} onChange={(e) => setDetails({ ...details, repayment_period: e.target.value })}><option>3 months</option><option>6 months</option><option>9 months</option><option>12 months</option></select></label>
-          <Input label="Loan Purpose" value={details.loan_purpose} onChange={(loan_purpose) => setDetails({ ...details, loan_purpose })} />
+          <div>
+            <Input label="Loan Purpose" value={details.loan_purpose} onChange={(loan_purpose) => setDetails({ ...details, loan_purpose })} />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {purposes.map((purpose) => <button key={purpose} type="button" onClick={() => setDetails({ ...details, loan_purpose: purpose })} className={`rounded-input border px-3 py-2 text-xs font-semibold transition ${details.loan_purpose === purpose ? "border-primary bg-primary-light text-primary-dark" : "border-border hover:bg-surface-secondary"}`}>{purpose}</button>)}
+            </div>
+          </div>
           <div className="md:col-span-2"><TextArea label="M-Pesa / Bank Transaction Summary" value={form.mpesa_summary} onChange={(v) => setForm({ ...form, mpesa_summary: v })} /></div>
           <div className="md:col-span-2"><TextArea label="Seasonal Income Pattern" value={form.seasonal_pattern} onChange={(v) => setForm({ ...form, seasonal_pattern: v })} /></div>
           <div className="md:col-span-2 rounded-card bg-blue-light p-4 text-sm leading-6 text-blue">
             By submitting, the applicant consents to credit assessment, fraud checks, and responsible processing under the Kenya Data Protection Act, 2019.
           </div>
-          <motion.button whileTap={{ scale: 0.98 }} className="md:col-span-2 inline-flex w-full items-center justify-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark">
-            <FileText size={18} /> Submit loan application
-          </motion.button>
+          <div className="md:col-span-2 flex flex-col gap-3 sm:flex-row">
+            <button type="button" onClick={() => setDraftStatus(`Draft saved for ${form.applicant_name || "applicant"} at ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary">
+              <CheckCircle2 size={18} /> Save draft
+            </button>
+            <motion.button disabled={loading} whileTap={{ scale: 0.98 }} className="inline-flex flex-[1.4] items-center justify-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark disabled:cursor-wait disabled:opacity-70">
+              <FileText size={18} /> {loading ? "Reviewing application..." : "Submit loan application"}
+            </motion.button>
+          </div>
+          {draftStatus && <p className="md:col-span-2 rounded-card bg-primary-light p-3 text-sm font-semibold text-primary-dark">{draftStatus}</p>}
         </form>
       </Card>
 
@@ -387,12 +430,16 @@ function LoanApplication() {
             <Summary icon={Building2} label="Business" value={form.business_type} />
             <Summary icon={Landmark} label="County" value={form.location} />
           </div>
+          <div className="mt-4 rounded-card bg-amber-light p-4 text-sm leading-6 text-amber">
+            Estimated monthly repayment is about KES {monthlyEstimate.toLocaleString()}, subject to final review and accepted terms.
+          </div>
         </Card>
         <Card>
           <h2 className="font-semibold">Decision Status</h2>
           {loading && <div className="mt-5 space-y-3">{["Validating identity", "Assessing cash flow", "Checking fairness rules", "Preparing recommendation"].map((stage) => <div key={stage} className="flex items-center gap-3 rounded-card bg-surface-secondary p-3"><Activity className="animate-pulse text-primary" size={18} />{stage}</div>)}</div>}
           {!loading && !assessment && <EmptyState title="No application submitted yet" />}
           {!loading && assessment && <AssessmentResult assessment={assessment} submitted={submitted} />}
+          {!loading && assessment && <div className="mt-5 grid gap-3 sm:grid-cols-2"><button type="button" onClick={() => { setAssessment(null); setSubmitted(false); setDraftStatus(""); }} className="rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary">Edit application</button><button type="button" onClick={() => setDraftStatus("Officer callback requested. Our demo team will follow up by SMS.")} className="rounded-input bg-ink px-4 py-3 font-semibold text-white">Request callback</button></div>}
         </Card>
       </div>
     </div>
@@ -514,10 +561,15 @@ function Ethics() {
 function Audit() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
+  const [pageIndex, setPageIndex] = useState(0);
   const rows = useMemo(() => auditRecords.filter((row) => (status === "all" || row.status === status) && JSON.stringify(row).toLowerCase().includes(query.toLowerCase())), [query, status]);
+  const pageSize = 6;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(pageIndex, pageCount - 1);
+  const visibleRows = rows.slice(currentPage * pageSize, currentPage * pageSize + pageSize);
   const auditMetrics: [string, number][] = [["Total Events", auditRecords.length], ["Escalations", 3], ["Appeals Filed", 1], ["Successful Appeals", 1]];
 
-  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-4">{auditMetrics.map(([label, value]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Card>)}</div><Card><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div className="relative"><Search className="absolute left-3 top-3 text-muted" size={18} /><input aria-label="Search audit logs" value={query} onChange={(e) => setQuery(e.target.value)} className="w-full rounded-input border border-border py-3 pl-10 pr-3 md:w-80" placeholder="Search events" /></div><label className="flex items-center gap-2 text-sm"><SlidersHorizontal size={18} />Status<select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-input border border-border px-3 py-2"><option value="all">All</option><option value="completed">Completed</option><option value="escalated">Escalated</option><option value="pending">Pending</option><option value="failed">Failed</option></select></label></div><div className="mt-5 overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm"><thead className="text-muted"><tr><th className="py-3">Time</th><th>Event</th><th>Application</th><th>Agent</th><th>Status</th></tr></thead><tbody>{rows.map((row) => <motion.tr key={row.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-border"><td className="py-4">{new Date(row.timestamp).toLocaleString()}</td><td>{row.event}</td><td>{row.application_id}</td><td>{row.agent}</td><td><Badge tone={row.status === "escalated" ? "amber" : row.status === "failed" ? "red" : "green"}>{row.status}</Badge></td></motion.tr>)}</tbody></table></div><div className="mt-4 flex justify-end gap-2"><button className="rounded-input border border-border px-3 py-2">Previous</button><button className="rounded-input bg-ink px-3 py-2 text-white">Next</button></div></Card></div>;
+  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-4">{auditMetrics.map(([label, value]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Card>)}</div><Card><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div className="relative"><Search className="absolute left-3 top-3 text-muted" size={18} /><input aria-label="Search audit logs" value={query} onChange={(e) => { setQuery(e.target.value); setPageIndex(0); }} className="w-full rounded-input border border-border py-3 pl-10 pr-3 md:w-80" placeholder="Search events" /></div><label className="flex items-center gap-2 text-sm"><SlidersHorizontal size={18} />Status<select value={status} onChange={(e) => { setStatus(e.target.value); setPageIndex(0); }} className="rounded-input border border-border px-3 py-2"><option value="all">All</option><option value="completed">Completed</option><option value="escalated">Escalated</option><option value="pending">Pending</option><option value="failed">Failed</option></select></label></div><div className="mt-5 overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm"><thead className="text-muted"><tr><th className="py-3">Time</th><th>Event</th><th>Application</th><th>Agent</th><th>Status</th></tr></thead><tbody>{visibleRows.map((row) => <motion.tr key={row.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-border"><td className="py-4">{new Date(row.timestamp).toLocaleString()}</td><td>{row.event}</td><td>{row.application_id}</td><td>{row.agent}</td><td><Badge tone={row.status === "escalated" ? "amber" : row.status === "failed" ? "red" : "green"}>{row.status}</Badge></td></motion.tr>)}</tbody></table></div><div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-muted">Page {currentPage + 1} of {pageCount} · {rows.length} events</p><div className="flex justify-end gap-2"><button type="button" disabled={currentPage === 0} onClick={() => setPageIndex((value) => Math.max(0, value - 1))} className="rounded-input border border-border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-45">Previous</button><button type="button" disabled={currentPage >= pageCount - 1} onClick={() => setPageIndex((value) => Math.min(pageCount - 1, value + 1))} className="rounded-input bg-ink px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-45">Next</button></div></div></Card></div>;
 }
 
 function Input({ label, value, onChange, type = "text", placeholder, icon: Icon }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string; icon?: LucideIcon }) {
