@@ -230,50 +230,61 @@ function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogi
   }
 
   return (
-    <main className="min-h-screen bg-surface-secondary">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-        <section className="space-y-8">
+    <main className="relative min-h-screen overflow-x-hidden bg-ink">
+      <div className="absolute inset-0 bg-[url('/images/loan-hero.png')] bg-cover bg-center opacity-70" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-white/62 to-primary-dark/56" aria-hidden="true" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink/35 to-transparent" aria-hidden="true" />
+
+      <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 sm:px-6 lg:px-8">
+        <header className="flex items-center justify-between gap-4">
           <Logo />
-          <div className="max-w-2xl">
-            <Badge tone="ink">Secure access required</Badge>
-            <h1 className="mt-5 text-4xl font-semibold leading-tight text-ink md:text-6xl">Welcome to your trusted loan application platform.</h1>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-muted">Login or create an account before accessing Imara Capital. Your application, consent, and loan status stay protected behind this secure gateway.</p>
-          </div>
-          <div className="grid max-w-3xl gap-4 sm:grid-cols-3">
-            <Feature icon={Smartphone} title="M-Pesa aware" text="Cash-flow summaries support informal businesses." />
-            <Feature icon={ShieldCheck} title="Consent led" text="Built around privacy and Kenya DPA controls." />
-            <Feature icon={CalendarClock} title="Fast review" text="Human review is available for sensitive cases." />
+          <Badge tone="green"><BadgeCheck size={14} /> Verified Kenya fintech</Badge>
+        </header>
+
+        <section className="grid flex-1 items-center gap-8 py-8 lg:grid-cols-[0.88fr_1fr] lg:gap-12">
+          <Card className="order-1 mx-auto w-full max-w-lg border-white/65 bg-white/96 shadow-2xl shadow-ink/20 backdrop-blur-xl lg:order-none">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Badge tone="ink">Secure access required</Badge>
+                <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink sm:text-4xl">Login to Imara Capital</h1>
+                <p className="mt-2 text-sm leading-6 text-muted">Choose Login or Create Account to access your protected loan dashboard.</p>
+              </div>
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-card bg-primary-light text-primary-dark"><Lock size={22} /></div>
+            </div>
+            <div className="mt-6 grid grid-cols-2 rounded-card bg-surface-secondary p-1">
+              <button type="button" onClick={() => { setMode("login"); setError(""); }} className={`rounded-input px-3 py-3 text-sm font-semibold transition ${mode === "login" ? "bg-surface text-primary-dark shadow-sm" : "text-muted hover:text-ink"}`}>Login</button>
+              <button type="button" onClick={() => { setMode("signup"); setError(""); }} className={`rounded-input px-3 py-3 text-sm font-semibold transition ${mode === "signup" ? "bg-surface text-primary-dark shadow-sm" : "text-muted hover:text-ink"}`}>Create Account</button>
+            </div>
+            <form onSubmit={submit} className="mt-6 space-y-4">
+              {mode === "signup" && <Input label="Full Name" value={login.fullName} onChange={(fullName) => setLogin({ ...login, fullName })} placeholder="Amina Wanjiku" icon={Users} />}
+              <Input label="Email Address" type="email" value={login.email} onChange={(email) => setLogin({ ...login, email })} placeholder="amina@example.com" icon={Mail} />
+              <Input label="Phone Number" value={login.phone} onChange={(phone) => setLogin({ ...login, phone })} placeholder="0712 345 678" icon={Phone} />
+              <Input label="National ID / Passport" value={login.nationalId} onChange={(nationalId) => setLogin({ ...login, nationalId })} placeholder="12345678" icon={IdCard} />
+              <Input label="Password" type="password" value={login.password} onChange={(password) => setLogin({ ...login, password })} placeholder="Enter your password" />
+              {mode === "signup" && <Input label="Confirm Password" type="password" value={login.confirmPassword} onChange={(confirmPassword) => setLogin({ ...login, confirmPassword })} placeholder="Confirm your password" />}
+              {error && <p className="rounded-card bg-danger-light p-3 text-sm font-semibold text-danger">{error}</p>}
+              <motion.button whileTap={{ scale: 0.98 }} className="inline-flex w-full items-center justify-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white shadow-lg shadow-primary/20 hover:bg-primary-dark">
+                <LogIn size={18} /> {mode === "login" ? "Login and continue" : "Create account and continue"}
+              </motion.button>
+            </form>
+            <div className="mt-5 grid gap-3 rounded-card border border-primary/15 bg-primary-light/45 p-4 text-sm leading-6 text-primary-dark sm:grid-cols-3">
+              <span className="inline-flex items-center gap-2 font-semibold"><ShieldCheck size={16} /> SSL secured</span>
+              <span className="inline-flex items-center gap-2 font-semibold"><Scale size={16} /> Kenya DPA aware</span>
+              <span className="inline-flex items-center gap-2 font-semibold"><BadgeCheck size={16} /> Verified reviews</span>
+            </div>
+          </Card>
+
+          <div className="order-2 text-ink drop-shadow-[0_1px_0_rgba(255,255,255,0.55)] lg:order-none">
+            <Badge tone="green">Trusted loan access</Badge>
+            <h2 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">A secure place to request funding with confidence.</h2>
+            <p className="mt-5 max-w-xl text-base leading-8 text-ink/75 md:text-lg">Imara Capital helps Kenyan entrepreneurs apply for loans, track review progress, and understand decisions before accepting any terms.</p>
+            <div className="mt-7 grid max-w-3xl gap-4 sm:grid-cols-3">
+              <Feature icon={Smartphone} title="M-Pesa aware" text="Cash-flow summaries support informal businesses." />
+              <Feature icon={ShieldCheck} title="Consent led" text="Built around privacy and Kenya DPA controls." />
+              <Feature icon={CalendarClock} title="Fast review" text="Human review is available for sensitive cases." />
+            </div>
           </div>
         </section>
-
-        <Card className="mx-auto w-full max-w-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold">{mode === "login" ? "Login" : "Create Account"}</h2>
-              <p className="mt-1 text-sm text-muted">Choose an option below to continue.</p>
-            </div>
-            <div className="grid h-11 w-11 place-items-center rounded-card bg-primary-light text-primary-dark"><Lock size={20} /></div>
-          </div>
-          <div className="mt-6 grid grid-cols-2 rounded-card bg-surface-secondary p-1">
-            <button type="button" onClick={() => { setMode("login"); setError(""); }} className={`rounded-input px-3 py-3 text-sm font-semibold transition ${mode === "login" ? "bg-surface text-primary-dark shadow-sm" : "text-muted hover:text-ink"}`}>Login</button>
-            <button type="button" onClick={() => { setMode("signup"); setError(""); }} className={`rounded-input px-3 py-3 text-sm font-semibold transition ${mode === "signup" ? "bg-surface text-primary-dark shadow-sm" : "text-muted hover:text-ink"}`}>Create Account</button>
-          </div>
-          <form onSubmit={submit} className="mt-6 space-y-4">
-            {mode === "signup" && <Input label="Full Name" value={login.fullName} onChange={(fullName) => setLogin({ ...login, fullName })} placeholder="Amina Wanjiku" icon={Users} />}
-            <Input label="Email Address" type="email" value={login.email} onChange={(email) => setLogin({ ...login, email })} placeholder="amina@example.com" icon={Mail} />
-            <Input label="Phone Number" value={login.phone} onChange={(phone) => setLogin({ ...login, phone })} placeholder="0712 345 678" icon={Phone} />
-            <Input label="National ID / Passport" value={login.nationalId} onChange={(nationalId) => setLogin({ ...login, nationalId })} placeholder="12345678" icon={IdCard} />
-            <Input label="Password" type="password" value={login.password} onChange={(password) => setLogin({ ...login, password })} placeholder="Enter your password" />
-            {mode === "signup" && <Input label="Confirm Password" type="password" value={login.confirmPassword} onChange={(confirmPassword) => setLogin({ ...login, confirmPassword })} placeholder="Confirm your password" />}
-            {error && <p className="rounded-card bg-danger-light p-3 text-sm font-semibold text-danger">{error}</p>}
-            <motion.button whileTap={{ scale: 0.98 }} className="inline-flex w-full items-center justify-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark">
-              <LogIn size={18} /> {mode === "login" ? "Login and continue" : "Create account and continue"}
-            </motion.button>
-          </form>
-          <div className="mt-5 rounded-card bg-surface-secondary p-4 text-sm leading-6 text-muted">
-            Demo authentication is enabled for preview. In production this screen connects to Supabase Auth, SMS OTP, and KYC verification.
-          </div>
-        </Card>
       </div>
     </main>
   );
