@@ -231,18 +231,22 @@ function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogi
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-ink">
-      <div className="absolute inset-0 bg-[url('/images/vendor-hero.png')] bg-cover bg-center opacity-65" aria-hidden="true" />
-      <div className="absolute inset-0 bg-ink/72" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-br from-ink/35 via-ink/58 to-ink/88" aria-hidden="true" />
+      <div
+        className="absolute inset-0 bg-cover opacity-100"
+        style={{ backgroundImage: "url('/images/vendor-hero.png')", backgroundPosition: "right center" }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/35 to-ink/5" aria-hidden="true" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-ink/45 to-transparent" aria-hidden="true" />
 
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between gap-4 rounded-panel border border-white/30 bg-white/92 px-3 py-2 shadow-soft backdrop-blur-xl">
+        <header className="flex items-center justify-between gap-4 rounded-panel border border-white/70 bg-white/95 px-3 py-2 shadow-soft backdrop-blur-xl">
           <Logo />
           <Badge tone="green"><BadgeCheck size={14} /> Verified Kenya fintech</Badge>
         </header>
 
-        <section className="flex flex-1 items-center justify-center py-8">
-          <Card className="mx-auto w-full max-w-xl border-white/75 bg-white/98 shadow-2xl shadow-ink/30 backdrop-blur-xl">
+        <section className="flex flex-1 items-center justify-center py-8 lg:justify-start">
+          <Card className="w-full max-w-xl border-white/75 bg-white/95 shadow-2xl shadow-ink/30 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <Badge tone="ink">Secure access required</Badge>
