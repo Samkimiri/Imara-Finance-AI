@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Imara Capital</title>
+  <desc id="desc">Dark app icon with a white I mark and green trust signal.</desc>
+  <rect width="512" height="512" rx="112" fill="#0B1714"/>
+  <rect x="54" y="54" width="404" height="404" rx="86" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="18"/>
+  <path d="M236 142h72v228h-72z" fill="#FFFFFF"/>
+  <path d="M184 142h176v56H184zM184 314h176v56H184z" fill="#FFFFFF"/>
+  <circle cx="348" cy="348" r="48" fill="#13966F"/>
+  <path d="M326 349l16 16 32-38" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

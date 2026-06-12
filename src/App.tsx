@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -14,6 +14,10 @@ import { invokeAssessment, submitAppeal, updateConsent } from "./lib/supabase";
 import type { ApplicationInput, Assessment } from "./lib/types";
 
 type Page = "home" | "apply" | "overview" | "underwriting" | "agents" | "ethics" | "audit";
+type InstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+};
 
 const pages: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "home", label: "Home", icon: Gauge },
@@ -59,7 +63,7 @@ const initialDetails: ApplicationDetails = {
 };
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <motion.section whileHover={{ y: -2 }} className={`rounded-card border border-border bg-surface p-5 shadow-soft ${className}`}>{children}</motion.section>;
+  return <motion.section whileHover={{ y: -2 }} className={`rounded-card border border-border bg-surface/95 p-5 shadow-soft ${className}`}>{children}</motion.section>;
 }
 
 function Badge({ children, tone = "green" }: { children: React.ReactNode; tone?: "green" | "blue" | "amber" | "red" | "ink" }) {
@@ -101,11 +105,33 @@ export function App() {
   const [page, setPage] = useState<Page>("home");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
+  const [installStatus, setInstallStatus] = useState("");
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as InstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  }, []);
 
   function signIn(event: React.FormEvent) {
     event.preventDefault();
     setAuthenticated(true);
     setPage("apply");
+  }
+
+  async function installApp() {
+    if (!installPrompt) {
+      setInstallStatus("Use your browser menu to install Imara Capital on this device.");
+      return;
+    }
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    setInstallStatus(choice.outcome === "accepted" ? "Imara Capital is ready as an app." : "Install dismissed. You can try again from the browser menu.");
+    setInstallPrompt(null);
   }
 
   if (!authenticated) {
@@ -114,7 +140,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden border-r border-border bg-surface p-4 transition-all duration-300 lg:block ${collapsed ? "w-20" : "w-72"}`} aria-label="Primary navigation">
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden border-r border-border bg-surface/90 p-4 shadow-soft backdrop-blur-xl transition-all duration-300 lg:block ${collapsed ? "w-20" : "w-72"}`} aria-label="Primary navigation">
         <div className="mb-8 flex items-center justify-between">
           <Logo compact={collapsed} />
           <button className="rounded-input p-2 hover:bg-surface-secondary" onClick={() => setCollapsed(!collapsed)} aria-label="Toggle sidebar">
@@ -139,7 +165,7 @@ export function App() {
       </AnimatePresence>
 
       <main className={`transition-all duration-300 ${collapsed ? "lg:ml-20" : "lg:ml-72"}`}>
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-surface/95 px-5 py-4 backdrop-blur">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-surface/85 px-4 py-3 shadow-sm backdrop-blur-xl md:px-5 md:py-4">
           <button className="rounded-input p-2 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu"><Menu size={20} /></button>
           <div>
             <p className="text-sm text-muted">Secure credit for Kenyan entrepreneurs</p>
@@ -147,14 +173,18 @@ export function App() {
           </div>
           <div className="hidden items-center gap-3 sm:flex">
             <Badge tone="blue">Kenya DPA 2019 Ready</Badge>
+            <button className="inline-flex items-center gap-2 rounded-input border border-border px-3 py-2 text-sm font-semibold hover:bg-surface-secondary" onClick={installApp}>
+              <Smartphone size={16} /> Install app
+            </button>
             <button className="inline-flex items-center gap-2 rounded-input border border-border px-3 py-2 text-sm font-semibold hover:bg-surface-secondary" onClick={() => setAuthenticated(false)}>
               <LogOut size={16} /> Sign out
             </button>
           </div>
         </header>
         <AnimatePresence mode="wait">
-          <motion.div key={page} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.22 }} className="mx-auto max-w-7xl p-5">
-            {page === "home" && <Home setPage={setPage} />}
+          <motion.div key={page} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.22 }} className="mx-auto max-w-7xl p-4 pb-28 md:p-5 md:pb-8">
+            {installStatus && <div className="mb-4 rounded-card border border-border bg-surface p-3 text-sm font-semibold text-primary-dark shadow-soft">{installStatus}</div>}
+            {page === "home" && <Home setPage={setPage} installApp={installApp} />}
             {page === "apply" && <LoanApplication />}
             {page === "overview" && <Overview />}
             {page === "underwriting" && <Underwriting title="Officer Assessment Console" description="Run or review an AI-assisted credit recommendation for a Kenyan borrower." />}
@@ -164,6 +194,7 @@ export function App() {
           </motion.div>
         </AnimatePresence>
       </main>
+      <MobileBottomNav page={page} setPage={setPage} />
     </div>
   );
 }
@@ -227,7 +258,7 @@ function Navigation({ page, setPage, collapsed = false }: { page: Page; setPage:
   );
 }
 
-function Home({ setPage }: { setPage: (page: Page) => void }) {
+function Home({ setPage, installApp }: { setPage: (page: Page) => void; installApp: () => void }) {
   const stats = [["Loan Range", "KES 5k - 500k"], ["Coverage", "47 Counties"], ["Approval Rate", "68%"], ["Review", "Same day"]];
   const flow = [
     ["Apply", "Tell us about the business", FileText],
@@ -236,7 +267,7 @@ function Home({ setPage }: { setPage: (page: Page) => void }) {
   ] as const;
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-panel border border-border bg-surface shadow-soft">
+      <section className="overflow-hidden rounded-panel border border-border bg-surface/95 shadow-soft">
         <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="p-6 md:p-8 lg:p-10">
             <Badge tone="blue">Kenya based responsible credit</Badge>
@@ -245,6 +276,7 @@ function Home({ setPage }: { setPage: (page: Page) => void }) {
             <div className="mt-7 flex flex-wrap gap-3">
               <button onClick={() => setPage("apply")} className="inline-flex items-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark"><FileText size={18} /> Start application <ArrowRight size={17} /></button>
               <button onClick={() => setPage("overview")} className="inline-flex items-center gap-2 rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary"><Landmark size={18} /> View portfolio</button>
+              <button onClick={installApp} className="inline-flex items-center gap-2 rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary"><Smartphone size={18} /> Install PWA</button>
             </div>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {flow.map(([title, text, Icon]) => (
@@ -316,6 +348,24 @@ function Home({ setPage }: { setPage: (page: Page) => void }) {
         </div>
       </section>
     </div>
+  );
+}
+
+function MobileBottomNav({ page, setPage }: { page: Page; setPage: (page: Page) => void }) {
+  const mobilePages = pages.filter((item) => ["home", "apply", "overview", "audit"].includes(item.id));
+  return (
+    <nav className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-4 rounded-panel border border-border bg-surface/95 p-2 shadow-soft backdrop-blur-xl lg:hidden" aria-label="Mobile navigation">
+      {mobilePages.map((item) => {
+        const Icon = item.icon;
+        const active = page === item.id;
+        return (
+          <button key={item.id} type="button" onClick={() => setPage(item.id)} className={`grid min-h-14 place-items-center rounded-input px-1 text-[11px] font-semibold transition ${active ? "bg-primary text-white" : "text-muted hover:bg-surface-secondary"}`} aria-current={active ? "page" : undefined}>
+            <Icon size={18} />
+            <span className="mt-1 truncate">{item.label.replace(" for Loan", "")}</span>
+          </button>
+        );
+      })}
+    </nav>
   );
 }
 

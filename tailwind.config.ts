@@ -8,23 +8,23 @@ export default {
         sans: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"]
       },
       colors: {
-        primary: "#1D9E75",
-        "primary-dark": "#0F6E56",
-        "primary-light": "#E1F5EE",
-        blue: "#185FA5",
-        "blue-light": "#E6F1FB",
-        amber: "#BA7517",
-        "amber-light": "#FAEEDA",
+        primary: "#13966F",
+        "primary-dark": "#0A604B",
+        "primary-light": "#E0F6EE",
+        blue: "#1E5B9E",
+        "blue-light": "#E7F1FC",
+        amber: "#A76412",
+        "amber-light": "#FFF3D8",
         danger: "#A32D2D",
         "danger-light": "#FCEBEB",
         surface: "#FFFFFF",
-        "surface-secondary": "#F7F8FA",
-        border: "rgba(0,0,0,0.08)",
-        ink: "#0F1117",
-        muted: "#6B7280"
+        "surface-secondary": "#F4F7F6",
+        border: "rgba(15, 23, 42, 0.09)",
+        ink: "#0B1714",
+        muted: "#647067"
       },
       boxShadow: {
-        soft: "0 10px 30px rgba(15, 17, 23, 0.07)"
+        soft: "0 18px 60px rgba(15, 17, 23, 0.09)"
       },
       borderRadius: {
         input: "8px",
