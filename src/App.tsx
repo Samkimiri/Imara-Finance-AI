@@ -3,7 +3,7 @@ import type React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import {
-  Activity, BadgeCheck, Banknote, Building2, CalendarClock, CheckCircle2, ChevronLeft, ChevronRight,
+  Activity, ArrowRight, BadgeCheck, Banknote, Building2, CalendarClock, CheckCircle2, ChevronLeft, ChevronRight,
   FileText, Gauge, History, IdCard, Landmark, Lock, LogIn, LogOut, Menu, Phone, Scale, Search,
   ShieldCheck, SlidersHorizontal, Smartphone, Users, WalletCards
 } from "lucide-react";
@@ -228,19 +228,79 @@ function Navigation({ page, setPage, collapsed = false }: { page: Page; setPage:
 }
 
 function Home({ setPage }: { setPage: (page: Page) => void }) {
-  const stats = [["Loan Range", "KES 5k - 500k"], ["Coverage", "47 Counties"], ["Review", "Same day"], ["Support", "SMS + Web"]];
+  const stats = [["Loan Range", "KES 5k - 500k"], ["Coverage", "47 Counties"], ["Approval Rate", "68%"], ["Review", "Same day"]];
+  const flow = [
+    ["Apply", "Tell us about the business", FileText],
+    ["Verify", "Confirm ID and cash flow", ShieldCheck],
+    ["Decide", "Get a fair recommendation", BadgeCheck]
+  ] as const;
   return (
-    <div className="space-y-5">
-      <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-panel border border-border bg-surface p-6 shadow-soft md:p-8">
-          <Badge tone="blue">Kenya based responsible credit</Badge>
-          <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight md:text-5xl">Business loans for traders, farmers, riders, and growing SMEs.</h2>
-          <p className="mt-4 max-w-2xl text-muted md:text-lg md:leading-8">Submit a professional application, attach context about your cash flow, and receive a transparent recommendation with appeal rights.</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button onClick={() => setPage("apply")} className="inline-flex items-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark"><FileText size={18} /> Start application</button>
-            <button onClick={() => setPage("ethics")} className="inline-flex items-center gap-2 rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary"><ShieldCheck size={18} /> View compliance</button>
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-panel border border-border bg-surface shadow-soft">
+        <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="p-6 md:p-8 lg:p-10">
+            <Badge tone="blue">Kenya based responsible credit</Badge>
+            <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight md:text-5xl">Business loans with a clear path from application to decision.</h2>
+            <p className="mt-4 max-w-2xl text-muted md:text-lg md:leading-8">Imara Capital gives Kenyan entrepreneurs a professional way to apply, verify cash flow, and understand the result before accepting funding.</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <button onClick={() => setPage("apply")} className="inline-flex items-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark"><FileText size={18} /> Start application <ArrowRight size={17} /></button>
+              <button onClick={() => setPage("overview")} className="inline-flex items-center gap-2 rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary"><Landmark size={18} /> View portfolio</button>
+            </div>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {flow.map(([title, text, Icon]) => (
+                <div key={title} className="rounded-card border border-border bg-surface-secondary p-4">
+                  <div className="grid h-9 w-9 place-items-center rounded-input bg-surface text-primary shadow-sm"><Icon size={18} /></div>
+                  <p className="mt-4 font-semibold">{title}</p>
+                  <p className="mt-1 text-sm leading-6 text-muted">{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-ink p-5 text-white md:p-7 lg:p-8">
+            <div className="rounded-panel border border-white/10 bg-white/[0.04] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm text-white/65">Live application preview</p>
+                  <h3 className="mt-1 text-2xl font-semibold">Amina Wanjiku</h3>
+                </div>
+                <Badge>Eligible</Badge>
+              </div>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <VisualMetric label="Requested" value="KES 65,000" />
+                <VisualMetric label="County" value="Nairobi" />
+              </div>
+              <div className="mt-5 rounded-card bg-white p-4 text-ink">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold">Cash-flow strength</p>
+                  <span className="text-sm text-primary-dark">82%</span>
+                </div>
+                <div className="mt-3 h-2 rounded-full bg-surface-secondary">
+                  <motion.div initial={{ width: 0 }} animate={{ width: "82%" }} className="h-2 rounded-full bg-primary" />
+                </div>
+                <div className="mt-4 grid grid-cols-6 items-end gap-2">
+                  {[38, 52, 45, 68, 61, 76].map((height, index) => <span key={index} className="rounded-t bg-blue-light" style={{ height }} />)}
+                </div>
+              </div>
+              <div className="mt-4 rounded-card border border-white/10 bg-white/[0.06] p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-input bg-primary text-white"><Smartphone size={19} /></div>
+                  <div>
+                    <p className="text-sm font-semibold">M-Pesa receipts verified</p>
+                    <p className="text-xs text-white/60">Repeat supplier payments detected</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-white/70">
+                {["ID check", "Fairness", "Review"].map((item) => <div key={item} className="rounded-input bg-white/[0.08] px-2 py-3">{item}</div>)}
+              </div>
+            </div>
           </div>
         </div>
+      </section>
+
+      <div className="grid gap-4 md:grid-cols-4">{stats.map(([label, value]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Card>)}</div>
+
+      <section className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
         <Card>
           <h3 className="font-semibold">Application checklist</h3>
           <div className="mt-4 space-y-3">
@@ -249,10 +309,18 @@ function Home({ setPage }: { setPage: (page: Page) => void }) {
             ))}
           </div>
         </Card>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Feature icon={Smartphone} title="M-Pesa aware" text="Cash-flow summaries support informal businesses." />
+          <Feature icon={ShieldCheck} title="Consent led" text="Built around privacy and Kenya DPA controls." />
+          <Feature icon={CalendarClock} title="Fast review" text="Human review is available for sensitive cases." />
+        </div>
       </section>
-      <div className="grid gap-4 md:grid-cols-4">{stats.map(([label, value]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Card>)}</div>
     </div>
   );
+}
+
+function VisualMetric({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-card border border-white/10 bg-white/[0.06] p-4"><p className="text-xs text-white/60">{label}</p><p className="mt-2 text-lg font-semibold">{value}</p></div>;
 }
 
 function LoanApplication() {
