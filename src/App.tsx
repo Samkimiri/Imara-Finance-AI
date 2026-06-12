@@ -231,9 +231,9 @@ function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogi
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-ink">
-      <div className="absolute inset-0 bg-[url('/images/loan-hero.png')] bg-cover bg-center opacity-70" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-white/62 to-primary-dark/56" aria-hidden="true" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink/35 to-transparent" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[url('/images/vendor-hero.png')] bg-cover bg-center opacity-90" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/92 via-white/70 to-ink/58" aria-hidden="true" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-ink/55 to-transparent" aria-hidden="true" />
 
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 sm:px-6 lg:px-8">
         <header className="flex items-center justify-between gap-4">
@@ -274,8 +274,8 @@ function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogi
             </div>
           </Card>
 
-          <div className="order-2 text-ink drop-shadow-[0_1px_0_rgba(255,255,255,0.55)] lg:order-none">
-            <Badge tone="green">Trusted loan access</Badge>
+          <div className="order-2 text-ink drop-shadow-[0_1px_0_rgba(255,255,255,0.65)] lg:order-none">
+            <Badge tone="amber">Mobile-first credit access</Badge>
             <h2 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">A secure place to request funding with confidence.</h2>
             <p className="mt-5 max-w-xl text-base leading-8 text-ink/75 md:text-lg">Imara Capital helps Kenyan entrepreneurs apply for loans, track review progress, and understand decisions before accepting any terms.</p>
             <div className="mt-7 grid max-w-3xl gap-4 sm:grid-cols-3">
@@ -318,15 +318,15 @@ function Home({ setPage, installApp }: { setPage: (page: Page) => void; installA
       <section
         className="relative overflow-hidden rounded-panel border border-border bg-surface shadow-soft"
         style={{
-          backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,0.72) 100%), url('/images/loan-hero.png')",
-          backgroundPosition: "center",
+          backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.9) 43%, rgba(255,255,255,0.46) 100%), url('/images/vendor-hero.png')",
+          backgroundPosition: "center right",
           backgroundSize: "cover"
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-light/60 via-white/20 to-blue-light/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-light/70 via-white/10 to-amber-light/50" />
         <div className="relative grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="p-6 md:p-8 lg:p-10">
-            <Badge tone="blue">Friendly finance for Kenyan businesses</Badge>
+            <Badge tone="amber">Friendly finance for Kenyan businesses</Badge>
             <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight text-ink md:text-5xl">Apply for a loan with clarity, confidence, and human support.</h2>
             <p className="mt-4 max-w-2xl text-muted md:text-lg md:leading-8">Imara Capital gives entrepreneurs a secure way to request funding, verify cash flow, and understand every decision before accepting loan terms.</p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -658,7 +658,7 @@ function Underwriting({ title = "Applicant Input", description = "Run an AI-assi
 function AssessmentResult({ assessment, submitted = false, reference, backendStatus, applicationId, appeal, setAppeal, appealStatus, setAppealStatus }: { assessment: Assessment; submitted?: boolean; reference?: string; backendStatus?: string; applicationId?: string | null; appeal?: string; setAppeal?: (value: string) => void; appealStatus?: string; setAppealStatus?: (value: string) => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-5 space-y-5">
-      {submitted && <p className="rounded-card bg-primary-light p-3 text-sm font-semibold text-primary-dark">Application received. Reference: {reference ?? `APP-${Math.floor(5000 + assessment.credit_score)}`}{backendStatus ? ` · Status: ${backendStatus.replace("_", " ")}` : ""}</p>}
+      {submitted && <p className="rounded-card bg-primary-light p-3 text-sm font-semibold text-primary-dark">Application received. Reference: {reference ?? `APP-${Math.floor(5000 + assessment.credit_score)}`}{backendStatus ? ` - Status: ${backendStatus.replace("_", " ")}` : ""}</p>}
       <div className="flex flex-wrap items-center gap-3"><Badge tone={assessment.decision === "Approved" ? "green" : assessment.decision === "Declined" ? "red" : "amber"}>{assessment.decision}</Badge><span className="text-sm text-muted">Recommended KES {assessment.recommended_amount.toLocaleString()}</span></div>
       <div className="grid gap-3 sm:grid-cols-2"><Score label="Credit Score" value={assessment.credit_score} max={850} /><Score label="Confidence" value={assessment.confidence} max={100} suffix="%" /></div>
       <div className="space-y-3">{Object.entries(assessment.factors).map(([label, value]) => <div key={label}><div className="flex justify-between text-sm"><span>{label}</span><span>{value}%</span></div><motion.div className="mt-2 h-2 rounded-full bg-surface-secondary"><motion.div initial={{ width: 0 }} animate={{ width: `${value}%` }} className="h-2 rounded-full bg-primary" /></motion.div></div>)}</div>
@@ -709,7 +709,7 @@ function Audit() {
   const visibleRows = rows.slice(currentPage * pageSize, currentPage * pageSize + pageSize);
   const auditMetrics: [string, number][] = [["Total Events", auditRecords.length], ["Escalations", 3], ["Appeals Filed", 1], ["Successful Appeals", 1]];
 
-  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-4">{auditMetrics.map(([label, value]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Card>)}</div><Card><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div className="relative"><Search className="absolute left-3 top-3 text-muted" size={18} /><input aria-label="Search audit logs" value={query} onChange={(e) => { setQuery(e.target.value); setPageIndex(0); }} className="w-full rounded-input border border-border py-3 pl-10 pr-3 md:w-80" placeholder="Search events" /></div><label className="flex items-center gap-2 text-sm"><SlidersHorizontal size={18} />Status<select value={status} onChange={(e) => { setStatus(e.target.value); setPageIndex(0); }} className="rounded-input border border-border px-3 py-2"><option value="all">All</option><option value="completed">Completed</option><option value="escalated">Escalated</option><option value="pending">Pending</option><option value="failed">Failed</option></select></label></div><div className="mt-5 overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm"><thead className="text-muted"><tr><th className="py-3">Time</th><th>Event</th><th>Application</th><th>Agent</th><th>Status</th></tr></thead><tbody>{visibleRows.map((row) => <motion.tr key={row.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-border"><td className="py-4">{new Date(row.timestamp).toLocaleString()}</td><td>{row.event}</td><td>{row.application_id}</td><td>{row.agent}</td><td><Badge tone={row.status === "escalated" ? "amber" : row.status === "failed" ? "red" : "green"}>{row.status}</Badge></td></motion.tr>)}</tbody></table></div><div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-muted">Page {currentPage + 1} of {pageCount} · {rows.length} events</p><div className="flex justify-end gap-2"><button type="button" disabled={currentPage === 0} onClick={() => setPageIndex((value) => Math.max(0, value - 1))} className="rounded-input border border-border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-45">Previous</button><button type="button" disabled={currentPage >= pageCount - 1} onClick={() => setPageIndex((value) => Math.min(pageCount - 1, value + 1))} className="rounded-input bg-ink px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-45">Next</button></div></div></Card></div>;
+  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-4">{auditMetrics.map(([label, value]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Card>)}</div><Card><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div className="relative"><Search className="absolute left-3 top-3 text-muted" size={18} /><input aria-label="Search audit logs" value={query} onChange={(e) => { setQuery(e.target.value); setPageIndex(0); }} className="w-full rounded-input border border-border py-3 pl-10 pr-3 md:w-80" placeholder="Search events" /></div><label className="flex items-center gap-2 text-sm"><SlidersHorizontal size={18} />Status<select value={status} onChange={(e) => { setStatus(e.target.value); setPageIndex(0); }} className="rounded-input border border-border px-3 py-2"><option value="all">All</option><option value="completed">Completed</option><option value="escalated">Escalated</option><option value="pending">Pending</option><option value="failed">Failed</option></select></label></div><div className="mt-5 overflow-x-auto"><table className="w-full min-w-[780px] text-left text-sm"><thead className="text-muted"><tr><th className="py-3">Time</th><th>Event</th><th>Application</th><th>Agent</th><th>Status</th></tr></thead><tbody>{visibleRows.map((row) => <motion.tr key={row.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-t border-border"><td className="py-4">{new Date(row.timestamp).toLocaleString()}</td><td>{row.event}</td><td>{row.application_id}</td><td>{row.agent}</td><td><Badge tone={row.status === "escalated" ? "amber" : row.status === "failed" ? "red" : "green"}>{row.status}</Badge></td></motion.tr>)}</tbody></table></div><div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-muted">Page {currentPage + 1} of {pageCount} - {rows.length} events</p><div className="flex justify-end gap-2"><button type="button" disabled={currentPage === 0} onClick={() => setPageIndex((value) => Math.max(0, value - 1))} className="rounded-input border border-border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-45">Previous</button><button type="button" disabled={currentPage >= pageCount - 1} onClick={() => setPageIndex((value) => Math.min(pageCount - 1, value + 1))} className="rounded-input bg-ink px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-45">Next</button></div></div></Card></div>;
 }
 
 function Input({ label, value, onChange, type = "text", placeholder, icon: Icon }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string; icon?: LucideIcon }) {

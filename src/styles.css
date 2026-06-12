@@ -4,20 +4,20 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #13966F;
-  --color-primary-dark: #0A604B;
-  --color-primary-light: #E0F6EE;
-  --color-blue: #1E5B9E;
-  --color-blue-light: #E7F1FC;
-  --color-amber: #A76412;
-  --color-amber-light: #FFF3D8;
-  --color-danger: #A32D2D;
-  --color-danger-light: #FCEBEB;
+  --color-primary: #4B6F00;
+  --color-primary-dark: #263900;
+  --color-primary-light: #ECFFD8;
+  --color-blue: #10243A;
+  --color-blue-light: #E6EEF7;
+  --color-amber: #D95F00;
+  --color-amber-light: #FFF0E4;
+  --color-danger: #B91C1C;
+  --color-danger-light: #FFE8E8;
   --color-surface: #FFFFFF;
-  --color-surface-secondary: #F4F7F6;
-  --color-border: rgba(15, 23, 42, 0.09);
-  --color-text-primary: #0B1714;
-  --color-text-muted: #647067;
+  --color-surface-secondary: #F7FAF0;
+  --color-border: rgba(7, 17, 31, 0.11);
+  --color-text-primary: #07111F;
+  --color-text-muted: #617065;
 }
 
 html {
@@ -31,9 +31,9 @@ body {
   color: var(--color-text-primary);
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   background:
-    radial-gradient(circle at 10% 0%, rgba(19, 150, 111, 0.13), transparent 32rem),
-    radial-gradient(circle at 88% 8%, rgba(30, 91, 158, 0.12), transparent 28rem),
-    linear-gradient(180deg, #F8FBFA 0%, var(--color-surface-secondary) 42%, #EEF3F1 100%);
+    radial-gradient(circle at 10% 0%, rgba(193, 255, 114, 0.22), transparent 32rem),
+    radial-gradient(circle at 88% 8%, rgba(255, 117, 31, 0.14), transparent 28rem),
+    linear-gradient(180deg, #FCFEF7 0%, var(--color-surface-secondary) 42%, #EEF4E7 100%);
   min-height: 100%;
   -webkit-font-smoothing: antialiased;
 }
@@ -55,7 +55,7 @@ input, select, textarea {
 }
 
 *:focus-visible {
-  outline: 3px solid rgba(29, 158, 117, 0.28);
+  outline: 3px solid rgba(193, 255, 114, 0.55);
   outline-offset: 2px;
 }
 

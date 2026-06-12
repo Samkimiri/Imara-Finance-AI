@@ -7,3 +7,4 @@ vite-dev.*.log
 supabase/.branches
 supabase/.temp
 .vercel
+scratch/
