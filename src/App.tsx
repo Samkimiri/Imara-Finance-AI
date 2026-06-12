@@ -48,6 +48,7 @@ type LoginForm = {
 };
 
 type AuthMode = "login" | "signup";
+type AuthScreen = "marketing" | "login";
 
 type ApplicationDetails = {
   phone: string;
@@ -106,6 +107,7 @@ function Count({ value, suffix = "" }: { value: number; suffix?: string }) {
 
 export function App() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [authScreen, setAuthScreen] = useState<AuthScreen>("marketing");
   const [login, setLogin] = useState<LoginForm>({ fullName: "", email: "", phone: "", nationalId: "", password: "", confirmPassword: "" });
   const [page, setPage] = useState<Page>("home");
   const [collapsed, setCollapsed] = useState(false);
@@ -127,6 +129,11 @@ export function App() {
     setPage("home");
   }
 
+  function signOut() {
+    setAuthenticated(false);
+    setAuthScreen("marketing");
+  }
+
   async function installApp() {
     if (!installPrompt) {
       setInstallStatus("Use your browser menu to install Imara Capital on this device.");
@@ -139,7 +146,9 @@ export function App() {
   }
 
   if (!authenticated) {
-    return <LoginScreen login={login} setLogin={setLogin} onSuccess={completeAuth} />;
+    return authScreen === "marketing"
+      ? <MarketingScreen onLogin={() => setAuthScreen("login")} />
+      : <LoginScreen login={login} setLogin={setLogin} onBack={() => setAuthScreen("marketing")} onSuccess={completeAuth} />;
   }
 
   return (
@@ -180,7 +189,7 @@ export function App() {
             <button className="inline-flex items-center gap-2 rounded-input border border-border px-3 py-2 text-sm font-semibold hover:bg-surface-secondary" onClick={installApp}>
               <Smartphone size={16} /> Install app
             </button>
-            <button className="inline-flex items-center gap-2 rounded-input border border-border px-3 py-2 text-sm font-semibold hover:bg-surface-secondary" onClick={() => setAuthenticated(false)}>
+            <button className="inline-flex items-center gap-2 rounded-input border border-border px-3 py-2 text-sm font-semibold hover:bg-surface-secondary" onClick={signOut}>
               <LogOut size={16} /> Sign out
             </button>
           </div>
@@ -203,7 +212,94 @@ export function App() {
   );
 }
 
-function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogin: (value: LoginForm) => void; onSuccess: () => void }) {
+function MarketingScreen({ onLogin }: { onLogin: () => void }) {
+  const highlights: [string, string, LucideIcon][] = [
+    ["Apply with M-Pesa context", "Use everyday cash-flow signals to support a stronger loan application.", Smartphone],
+    ["Understand every decision", "See the recommendation, fairness checks, and review path before accepting terms.", ShieldCheck],
+    ["Human support included", "Sensitive or low-confidence cases can move into officer review instead of a blind decline.", Users]
+  ];
+  const faq = [
+    ["Who can use Imara Capital?", "Kenyan entrepreneurs, market vendors, farmers, and small businesses looking for responsible working-capital loans."],
+    ["Do I need formal payslips?", "No. The platform is designed to support informal and semi-formal businesses using business details, M-Pesa summaries, and repayment context."],
+    ["Is approval automatic?", "No. AI helps prepare a recommendation, but fairness controls, consent rules, and human review are part of the workflow."],
+    ["What happens after I log in?", "You can complete a loan application, review the assessment, refresh your status, and request support if more context is needed."]
+  ];
+
+  return (
+    <main className="min-h-screen bg-surface-secondary">
+      <section
+        className="relative min-h-[92vh] overflow-hidden bg-ink"
+        style={{
+          backgroundImage: "linear-gradient(90deg, rgba(7,17,31,0.88) 0%, rgba(7,17,31,0.58) 46%, rgba(7,17,31,0.08) 100%), url('/images/vendor-hero.png')",
+          backgroundPosition: "right center",
+          backgroundSize: "cover"
+        }}
+      >
+        <div className="mx-auto flex min-h-[92vh] max-w-7xl flex-col px-5 py-5 sm:px-6 lg:px-8">
+          <header className="flex items-center justify-between gap-4 rounded-panel border border-white/20 bg-white/95 px-3 py-2 shadow-soft backdrop-blur-xl">
+            <Logo />
+            <button type="button" onClick={onLogin} className="inline-flex items-center gap-2 rounded-input bg-primary px-4 py-2 text-sm font-semibold text-white shadow-soft hover:bg-primary-dark">
+              <LogIn size={16} /> Login to apply
+            </button>
+          </header>
+
+          <div className="grid flex-1 items-center gap-8 py-10 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="max-w-2xl text-white">
+              <Badge tone="amber">Responsible loans for Kenyan businesses</Badge>
+              <h1 className="mt-5 text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">Funding that understands real business cash flow.</h1>
+              <p className="mt-5 max-w-xl text-base leading-8 text-white/80 md:text-lg">Imara Capital helps entrepreneurs turn M-Pesa activity, business context, and repayment history into a clearer, fairer loan review.</p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <button type="button" onClick={onLogin} className="inline-flex items-center gap-2 rounded-input bg-primary px-5 py-3 font-semibold text-white shadow-soft hover:bg-primary-dark">
+                  Login to start your application <ArrowRight size={18} />
+                </button>
+                <a href="#faq" className="inline-flex items-center gap-2 rounded-input border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur hover:bg-white/20">
+                  Read FAQs
+                </a>
+              </div>
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {["KES 5k - 500k", "47 counties", "Same-day review"].map((item) => (
+                  <div key={item} className="rounded-card border border-white/20 bg-white/10 p-4 text-sm font-semibold backdrop-blur">{item}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-5 py-10 sm:px-6 lg:grid-cols-3 lg:px-8">
+        {highlights.map(([title, text, Icon]) => (
+          <div key={title} className="rounded-card border border-border bg-surface p-5 shadow-soft">
+            <div className="grid h-11 w-11 place-items-center rounded-input bg-primary-light text-primary-dark"><Icon size={20} /></div>
+            <h2 className="mt-4 text-lg font-semibold">{title}</h2>
+            <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
+          </div>
+        ))}
+      </section>
+
+      <section id="faq" className="mx-auto max-w-4xl px-5 pb-12 sm:px-6 lg:px-8">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <Badge tone="blue">FAQ</Badge>
+            <h2 className="mt-3 text-3xl font-semibold">Questions before you log in</h2>
+          </div>
+          <button type="button" onClick={onLogin} className="inline-flex items-center justify-center gap-2 rounded-input bg-ink px-4 py-3 font-semibold text-white hover:bg-primary-dark">
+            Login and continue <LogIn size={17} />
+          </button>
+        </div>
+        <div className="space-y-3">
+          {faq.map(([question, answer]) => (
+            <details key={question} className="rounded-card border border-border bg-surface p-5 shadow-soft">
+              <summary className="cursor-pointer font-semibold text-ink">{question}</summary>
+              <p className="mt-3 text-sm leading-6 text-muted">{answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function LoginScreen({ login, setLogin, onBack, onSuccess }: { login: LoginForm; setLogin: (value: LoginForm) => void; onBack: () => void; onSuccess: () => void }) {
   const [mode, setMode] = useState<AuthMode>("login");
   const [error, setError] = useState("");
 
@@ -242,7 +338,10 @@ function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogi
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 sm:px-6 lg:px-8">
         <header className="flex items-center justify-between gap-4 rounded-panel border border-white/70 bg-white/95 px-3 py-2 shadow-soft backdrop-blur-xl">
           <Logo />
-          <Badge tone="green"><BadgeCheck size={14} /> Verified Kenya fintech</Badge>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={onBack} className="hidden rounded-input border border-border px-3 py-2 text-sm font-semibold hover:bg-surface-secondary sm:inline-flex">Marketing page</button>
+            <Badge tone="green"><BadgeCheck size={14} /> Verified Kenya fintech</Badge>
+          </div>
         </header>
 
         <section className="flex flex-1 items-center justify-center py-8 lg:justify-start">
