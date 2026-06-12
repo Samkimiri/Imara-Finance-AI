@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import {
   Activity, ArrowRight, BadgeCheck, Banknote, Building2, CalendarClock, CheckCircle2, ChevronLeft, ChevronRight,
-  FileText, Gauge, History, IdCard, Landmark, Lock, LogIn, LogOut, Menu, Phone, Scale, Search,
+  FileText, Gauge, History, IdCard, Landmark, Lock, LogIn, LogOut, Mail, Menu, Phone, Scale, Search,
   ShieldCheck, SlidersHorizontal, Smartphone, Users, WalletCards
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -39,10 +39,15 @@ const initialForm: ApplicationInput = {
 };
 
 type LoginForm = {
+  fullName: string;
+  email: string;
   phone: string;
   nationalId: string;
   password: string;
+  confirmPassword: string;
 };
+
+type AuthMode = "login" | "signup";
 
 type ApplicationDetails = {
   phone: string;
@@ -101,7 +106,7 @@ function Count({ value, suffix = "" }: { value: number; suffix?: string }) {
 
 export function App() {
   const [authenticated, setAuthenticated] = useState(false);
-  const [login, setLogin] = useState<LoginForm>({ phone: "", nationalId: "", password: "" });
+  const [login, setLogin] = useState<LoginForm>({ fullName: "", email: "", phone: "", nationalId: "", password: "", confirmPassword: "" });
   const [page, setPage] = useState<Page>("home");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -117,10 +122,9 @@ export function App() {
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   }, []);
 
-  function signIn(event: React.FormEvent) {
-    event.preventDefault();
+  function completeAuth() {
     setAuthenticated(true);
-    setPage("apply");
+    setPage("home");
   }
 
   async function installApp() {
@@ -135,7 +139,7 @@ export function App() {
   }
 
   if (!authenticated) {
-    return <LoginScreen login={login} setLogin={setLogin} onSubmit={signIn} />;
+    return <LoginScreen login={login} setLogin={setLogin} onSuccess={completeAuth} />;
   }
 
   return (
@@ -199,16 +203,41 @@ export function App() {
   );
 }
 
-function LoginScreen({ login, setLogin, onSubmit }: { login: LoginForm; setLogin: (value: LoginForm) => void; onSubmit: (event: React.FormEvent) => void }) {
+function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogin: (value: LoginForm) => void; onSuccess: () => void }) {
+  const [mode, setMode] = useState<AuthMode>("login");
+  const [error, setError] = useState("");
+
+  function validate() {
+    const phoneDigits = login.phone.replace(/\D/g, "");
+    if (mode === "signup" && login.fullName.trim().length < 2) return "Enter your full name to create an account.";
+    if (!/^\S+@\S+\.\S+$/.test(login.email.trim())) return "Enter a valid email address.";
+    if (phoneDigits.length < 9) return "Enter a valid phone number.";
+    if (login.nationalId.trim().length < 6) return "Enter a valid National ID or passport number.";
+    if (login.password.length < 6) return "Password must be at least 6 characters.";
+    if (mode === "signup" && login.password !== login.confirmPassword) return "Passwords do not match.";
+    return "";
+  }
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError("");
+    onSuccess();
+  }
+
   return (
     <main className="min-h-screen bg-surface-secondary">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+      <div className="mx-auto grid min-h-screen max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
         <section className="space-y-8">
           <Logo />
           <div className="max-w-2xl">
-            <Badge tone="ink">Professional Kenya lending portal</Badge>
-            <h1 className="mt-5 text-4xl font-semibold leading-tight text-ink md:text-6xl">Apply, verify, and manage business loans with confidence.</h1>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-muted">Imara Capital helps Kenyan entrepreneurs submit loan applications, verify M-Pesa backed cash flow, and receive fair, explainable credit decisions.</p>
+            <Badge tone="ink">Secure access required</Badge>
+            <h1 className="mt-5 text-4xl font-semibold leading-tight text-ink md:text-6xl">Welcome to your trusted loan application platform.</h1>
+            <p className="mt-5 max-w-xl text-lg leading-8 text-muted">Login or create an account before accessing Imara Capital. Your application, consent, and loan status stay protected behind this secure gateway.</p>
           </div>
           <div className="grid max-w-3xl gap-4 sm:grid-cols-3">
             <Feature icon={Smartphone} title="M-Pesa aware" text="Cash-flow summaries support informal businesses." />
@@ -220,21 +249,29 @@ function LoginScreen({ login, setLogin, onSubmit }: { login: LoginForm; setLogin
         <Card className="mx-auto w-full max-w-md">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold">Sign in</h2>
-              <p className="mt-1 text-sm text-muted">Use your phone and National ID to continue.</p>
+              <h2 className="text-2xl font-semibold">{mode === "login" ? "Login" : "Create Account"}</h2>
+              <p className="mt-1 text-sm text-muted">Choose an option below to continue.</p>
             </div>
             <div className="grid h-11 w-11 place-items-center rounded-card bg-primary-light text-primary-dark"><Lock size={20} /></div>
           </div>
-          <form onSubmit={onSubmit} className="mt-6 space-y-4">
-            <Input label="Phone Number" value={login.phone} onChange={(phone) => setLogin({ ...login, phone })} placeholder="0712 345 678" />
-            <Input label="National ID / Passport" value={login.nationalId} onChange={(nationalId) => setLogin({ ...login, nationalId })} placeholder="12345678" />
+          <div className="mt-6 grid grid-cols-2 rounded-card bg-surface-secondary p-1">
+            <button type="button" onClick={() => { setMode("login"); setError(""); }} className={`rounded-input px-3 py-3 text-sm font-semibold transition ${mode === "login" ? "bg-surface text-primary-dark shadow-sm" : "text-muted hover:text-ink"}`}>Login</button>
+            <button type="button" onClick={() => { setMode("signup"); setError(""); }} className={`rounded-input px-3 py-3 text-sm font-semibold transition ${mode === "signup" ? "bg-surface text-primary-dark shadow-sm" : "text-muted hover:text-ink"}`}>Create Account</button>
+          </div>
+          <form onSubmit={submit} className="mt-6 space-y-4">
+            {mode === "signup" && <Input label="Full Name" value={login.fullName} onChange={(fullName) => setLogin({ ...login, fullName })} placeholder="Amina Wanjiku" icon={Users} />}
+            <Input label="Email Address" type="email" value={login.email} onChange={(email) => setLogin({ ...login, email })} placeholder="amina@example.com" icon={Mail} />
+            <Input label="Phone Number" value={login.phone} onChange={(phone) => setLogin({ ...login, phone })} placeholder="0712 345 678" icon={Phone} />
+            <Input label="National ID / Passport" value={login.nationalId} onChange={(nationalId) => setLogin({ ...login, nationalId })} placeholder="12345678" icon={IdCard} />
             <Input label="Password" type="password" value={login.password} onChange={(password) => setLogin({ ...login, password })} placeholder="Enter your password" />
+            {mode === "signup" && <Input label="Confirm Password" type="password" value={login.confirmPassword} onChange={(confirmPassword) => setLogin({ ...login, confirmPassword })} placeholder="Confirm your password" />}
+            {error && <p className="rounded-card bg-danger-light p-3 text-sm font-semibold text-danger">{error}</p>}
             <motion.button whileTap={{ scale: 0.98 }} className="inline-flex w-full items-center justify-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark">
-              <LogIn size={18} /> Sign in to apply
+              <LogIn size={18} /> {mode === "login" ? "Login and continue" : "Create account and continue"}
             </motion.button>
           </form>
           <div className="mt-5 rounded-card bg-surface-secondary p-4 text-sm leading-6 text-muted">
-            Demo access is enabled for preview. In production this screen connects to Supabase Auth, SMS OTP, and KYC verification.
+            Demo authentication is enabled for preview. In production this screen connects to Supabase Auth, SMS OTP, and KYC verification.
           </div>
         </Card>
       </div>
@@ -267,29 +304,37 @@ function Home({ setPage, installApp }: { setPage: (page: Page) => void; installA
   ] as const;
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-panel border border-border bg-surface/95 shadow-soft">
-        <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+      <section
+        className="relative overflow-hidden rounded-panel border border-border bg-surface shadow-soft"
+        style={{
+          backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,0.72) 100%), url('/images/loan-hero.png')",
+          backgroundPosition: "center",
+          backgroundSize: "cover"
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-light/60 via-white/20 to-blue-light/60" />
+        <div className="relative grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="p-6 md:p-8 lg:p-10">
-            <Badge tone="blue">Kenya based responsible credit</Badge>
-            <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight md:text-5xl">Business loans with a clear path from application to decision.</h2>
-            <p className="mt-4 max-w-2xl text-muted md:text-lg md:leading-8">Imara Capital gives Kenyan entrepreneurs a professional way to apply, verify cash flow, and understand the result before accepting funding.</p>
+            <Badge tone="blue">Friendly finance for Kenyan businesses</Badge>
+            <h2 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight text-ink md:text-5xl">Apply for a loan with clarity, confidence, and human support.</h2>
+            <p className="mt-4 max-w-2xl text-muted md:text-lg md:leading-8">Imara Capital gives entrepreneurs a secure way to request funding, verify cash flow, and understand every decision before accepting loan terms.</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <button onClick={() => setPage("apply")} className="inline-flex items-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white hover:bg-primary-dark"><FileText size={18} /> Start application <ArrowRight size={17} /></button>
-              <button onClick={() => setPage("overview")} className="inline-flex items-center gap-2 rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary"><Landmark size={18} /> View portfolio</button>
-              <button onClick={installApp} className="inline-flex items-center gap-2 rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary"><Smartphone size={18} /> Install PWA</button>
+              <button onClick={() => setPage("apply")} className="inline-flex items-center gap-2 rounded-input bg-primary px-4 py-3 font-semibold text-white shadow-soft hover:bg-primary-dark"><FileText size={18} /> Start loan application <ArrowRight size={17} /></button>
+              <button onClick={() => setPage("overview")} className="inline-flex items-center gap-2 rounded-input border border-border bg-white/85 px-4 py-3 font-semibold backdrop-blur hover:bg-white"><Landmark size={18} /> View portfolio</button>
+              <button onClick={installApp} className="inline-flex items-center gap-2 rounded-input border border-border bg-white/85 px-4 py-3 font-semibold backdrop-blur hover:bg-white"><Smartphone size={18} /> Install app</button>
             </div>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {flow.map(([title, text, Icon]) => (
-                <div key={title} className="rounded-card border border-border bg-surface-secondary p-4">
-                  <div className="grid h-9 w-9 place-items-center rounded-input bg-surface text-primary shadow-sm"><Icon size={18} /></div>
+                <div key={title} className="rounded-card border border-border bg-white/80 p-4 shadow-sm backdrop-blur">
+                  <div className="grid h-9 w-9 place-items-center rounded-input bg-primary-light text-primary-dark shadow-sm"><Icon size={18} /></div>
                   <p className="mt-4 font-semibold">{title}</p>
                   <p className="mt-1 text-sm leading-6 text-muted">{text}</p>
                 </div>
               ))}
             </div>
           </div>
-          <div className="bg-ink p-5 text-white md:p-7 lg:p-8">
-            <div className="rounded-panel border border-white/10 bg-white/[0.04] p-4">
+          <div className="p-5 text-white md:p-7 lg:p-8">
+            <div className="rounded-panel border border-white/40 bg-ink/88 p-4 shadow-soft backdrop-blur">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm text-white/65">Live application preview</p>
