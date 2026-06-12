@@ -1,27 +1,13 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
-};
-
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-}
+import { corsHeaders, getSupabaseAdmin, json, methodNotAllowed, writeAudit } from "../_shared/backend.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !serviceKey) return json({ error: "Server configuration missing" }, 500);
+  if (req.method !== "POST") return methodNotAllowed();
 
   try {
     const authorization = req.headers.get("Authorization") ?? "";
-    const supabase = createClient(supabaseUrl, serviceKey);
+    const supabase = getSupabaseAdmin();
     const { data: userResult } = await supabase.auth.getUser(authorization.replace("Bearer ", ""));
     const user = userResult.user;
     if (!user) return json({ error: "Authentication required" }, 401);
@@ -36,18 +22,20 @@ serve(async (req) => {
       updated_at: new Date().toISOString()
     };
 
-    const { data, error } = await supabase.from("consent_settings").upsert(payload, { onConflict: "user_id" }).select("id").single();
+    const { data, error } = await supabase
+      .from("consent_settings")
+      .upsert(payload, { onConflict: "user_id" })
+      .select("id, updated_at")
+      .single();
     if (error) throw error;
 
-    await supabase.from("audit_logs").insert({
-      event: "Consent updated",
-      application_id: data.id,
-      agent: "Consent Service",
-      status: "completed",
-      metadata: payload
+    await writeAudit(supabase, "Consent updated", `CONS-${String(user.id).slice(0, 8)}`, "Consent Service", "completed", {
+      research_data_sharing: payload.research_data_sharing,
+      credit_bureau_exchange: payload.credit_bureau_exchange,
+      ethics_board_oversight: payload.ethics_board_oversight
     });
 
-    return json({ consent_id: data.id });
+    return json({ consent_id: data.id, updated_at: data.updated_at });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Unhandled error" }, 500);
   }

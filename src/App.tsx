@@ -10,8 +10,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { auditRecords, counties, segmentData } from "./lib/data";
 import { localAssessment } from "./lib/mockAssessment";
-import { invokeAssessment, submitAppeal, updateConsent } from "./lib/supabase";
-import type { ApplicationInput, Assessment } from "./lib/types";
+import { getApplicationStatus, invokeAssessment, submitAppeal, updateConsent } from "./lib/supabase";
+import type { ApplicationInput, ApplicationStatus, Assessment, AssessmentResponse } from "./lib/types";
 
 type Page = "home" | "apply" | "overview" | "underwriting" | "agents" | "ethics" | "audit";
 type InstallPromptEvent = Event & {
@@ -377,6 +377,9 @@ function LoanApplication() {
   const [form, setForm] = useState<ApplicationInput>(initialForm);
   const [details, setDetails] = useState<ApplicationDetails>(initialDetails);
   const [assessment, setAssessment] = useState<Assessment | null>(null);
+  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const [applicationReference, setApplicationReference] = useState("");
+  const [backendStatus, setBackendStatus] = useState<ApplicationStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [draftStatus, setDraftStatus] = useState("");
@@ -401,12 +404,43 @@ function LoanApplication() {
     setLoading(true);
     setSubmitted(false);
     setDraftStatus("");
+    setBackendStatus(null);
     try {
-      const data = await invokeAssessment(form).catch(() => ({ assessment: localAssessment(form) }));
-      setAssessment(data.assessment ?? data);
+      const data = await invokeAssessment(form).catch<AssessmentResponse>(() => ({ assessment: localAssessment(form) }));
+      const assessmentResult = data.assessment;
+      setAssessment(assessmentResult);
+      setApplicationId(data.application_id ?? null);
+      setApplicationReference(data.reference ?? `APP-${Math.floor(5000 + assessmentResult.credit_score)}`);
+      if (data.application_id) {
+        setBackendStatus({
+          id: data.application_id,
+          reference: data.reference ?? `APP-${String(data.application_id).slice(0, 8).toUpperCase()}`,
+          applicant_name: form.applicant_name,
+          loan_amount_kes: form.loan_amount_kes,
+          decision: assessmentResult.decision,
+          confidence: assessmentResult.confidence,
+          recommended_amount: assessmentResult.recommended_amount,
+          status: data.status ?? "assessed",
+          created_at: data.created_at ?? new Date().toISOString()
+        });
+      }
       setSubmitted(true);
     } finally {
       setTimeout(() => setLoading(false), 800);
+    }
+  }
+
+  async function refreshStatus() {
+    if (!applicationId) {
+      setDraftStatus("This demo assessment was completed locally. Connect Supabase to refresh server status.");
+      return;
+    }
+    try {
+      const status = await getApplicationStatus(applicationId);
+      setBackendStatus(status);
+      setDraftStatus(`Latest backend status: ${status.status.replace("_", " ")}.`);
+    } catch (error) {
+      setDraftStatus(error instanceof Error ? error.message : "Could not refresh application status.");
     }
   }
 
@@ -488,8 +522,8 @@ function LoanApplication() {
           <h2 className="font-semibold">Decision Status</h2>
           {loading && <div className="mt-5 space-y-3">{["Validating identity", "Assessing cash flow", "Checking fairness rules", "Preparing recommendation"].map((stage) => <div key={stage} className="flex items-center gap-3 rounded-card bg-surface-secondary p-3"><Activity className="animate-pulse text-primary" size={18} />{stage}</div>)}</div>}
           {!loading && !assessment && <EmptyState title="No application submitted yet" />}
-          {!loading && assessment && <AssessmentResult assessment={assessment} submitted={submitted} />}
-          {!loading && assessment && <div className="mt-5 grid gap-3 sm:grid-cols-2"><button type="button" onClick={() => { setAssessment(null); setSubmitted(false); setDraftStatus(""); }} className="rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary">Edit application</button><button type="button" onClick={() => setDraftStatus("Officer callback requested. Our demo team will follow up by SMS.")} className="rounded-input bg-ink px-4 py-3 font-semibold text-white">Request callback</button></div>}
+          {!loading && assessment && <AssessmentResult assessment={assessment} submitted={submitted} reference={applicationReference} backendStatus={backendStatus?.status} />}
+          {!loading && assessment && <div className="mt-5 grid gap-3 sm:grid-cols-3"><button type="button" onClick={() => { setAssessment(null); setSubmitted(false); setDraftStatus(""); setApplicationId(null); setBackendStatus(null); }} className="rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary">Edit application</button><button type="button" onClick={refreshStatus} className="rounded-input border border-border px-4 py-3 font-semibold hover:bg-surface-secondary">Refresh status</button><button type="button" onClick={() => setDraftStatus("Officer callback requested. Our demo team will follow up by SMS.")} className="rounded-input bg-ink px-4 py-3 font-semibold text-white">Request callback</button></div>}
         </Card>
       </div>
     </div>
@@ -539,7 +573,7 @@ function Underwriting({ title = "Applicant Input", description = "Run an AI-assi
     event.preventDefault();
     setLoading(true);
     try {
-      const data = await invokeAssessment(form).catch(() => ({ assessment: localAssessment(form) }));
+      const data = await invokeAssessment(form).catch<AssessmentResponse>(() => ({ assessment: localAssessment(form) }));
       setAssessment(data.assessment ?? data);
       setApplicationId(data.application_id ?? null);
     } finally {
@@ -565,10 +599,10 @@ function Underwriting({ title = "Applicant Input", description = "Run an AI-assi
   </div>;
 }
 
-function AssessmentResult({ assessment, submitted = false, applicationId, appeal, setAppeal, appealStatus, setAppealStatus }: { assessment: Assessment; submitted?: boolean; applicationId?: string | null; appeal?: string; setAppeal?: (value: string) => void; appealStatus?: string; setAppealStatus?: (value: string) => void }) {
+function AssessmentResult({ assessment, submitted = false, reference, backendStatus, applicationId, appeal, setAppeal, appealStatus, setAppealStatus }: { assessment: Assessment; submitted?: boolean; reference?: string; backendStatus?: string; applicationId?: string | null; appeal?: string; setAppeal?: (value: string) => void; appealStatus?: string; setAppealStatus?: (value: string) => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-5 space-y-5">
-      {submitted && <p className="rounded-card bg-primary-light p-3 text-sm font-semibold text-primary-dark">Application received. Reference: APP-{Math.floor(5000 + assessment.credit_score)}</p>}
+      {submitted && <p className="rounded-card bg-primary-light p-3 text-sm font-semibold text-primary-dark">Application received. Reference: {reference ?? `APP-${Math.floor(5000 + assessment.credit_score)}`}{backendStatus ? ` · Status: ${backendStatus.replace("_", " ")}` : ""}</p>}
       <div className="flex flex-wrap items-center gap-3"><Badge tone={assessment.decision === "Approved" ? "green" : assessment.decision === "Declined" ? "red" : "amber"}>{assessment.decision}</Badge><span className="text-sm text-muted">Recommended KES {assessment.recommended_amount.toLocaleString()}</span></div>
       <div className="grid gap-3 sm:grid-cols-2"><Score label="Credit Score" value={assessment.credit_score} max={850} /><Score label="Confidence" value={assessment.confidence} max={100} suffix="%" /></div>
       <div className="space-y-3">{Object.entries(assessment.factors).map(([label, value]) => <div key={label}><div className="flex justify-between text-sm"><span>{label}</span><span>{value}%</span></div><motion.div className="mt-2 h-2 rounded-full bg-surface-secondary"><motion.div initial={{ width: 0 }} animate={{ width: `${value}%` }} className="h-2 rounded-full bg-primary" /></motion.div></div>)}</div>

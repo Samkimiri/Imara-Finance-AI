@@ -19,6 +19,26 @@ export type ApplicationInput = {
   seasonal_pattern: string;
 };
 
+export type AssessmentResponse = {
+  application_id?: string;
+  reference?: string;
+  status?: string;
+  created_at?: string;
+  assessment: Assessment;
+};
+
+export type ApplicationStatus = {
+  id: string;
+  reference: string;
+  applicant_name: string;
+  loan_amount_kes: number;
+  decision: Decision | null;
+  confidence: number | null;
+  recommended_amount: number | null;
+  status: string;
+  created_at: string;
+};
+
 export type AuditRecord = {
   id: string;
   timestamp: string;

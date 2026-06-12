@@ -8,20 +8,25 @@ Production-ready responsible AI microloan platform for East Africa, designed for
 - Tailwind design system using the requested color tokens and Plus Jakarta Sans
 - Framer Motion page transitions and micro-interactions
 - Recharts borrower segment visualization
-- AI underwriting workflow with a secure Supabase Edge Function
-- Claude assessment engine with JSON validation and retries
+- AI underwriting workflow with secure Supabase Edge Functions
+- Claude assessment engine with JSON validation, retries, and deterministic fallback scoring
 - Supabase PostgreSQL schema, RLS policies, and seed audit data
-- Consent controls, governance dashboard, agent pipeline, kill-switch monitoring, appeals flow, and audit center
+- Consent controls, governance dashboard, agent pipeline, kill-switch monitoring, appeals flow, audit center, application status API, and application listing API
 
 ## Architecture
 
 ```text
 React Frontend
   -> Supabase Edge Function: assess-application
-      -> Anthropic Claude API
+      -> Anthropic Claude API when configured
+      -> deterministic backend fallback when Claude is unavailable
       -> JSON validation
       -> applications insert
       -> audit_logs insert
+  -> Supabase Edge Function: application-status
+      -> latest application status, reference, and decision data
+  -> Supabase Edge Function: list-applications
+      -> recent operational application queue
   -> Supabase PostgreSQL
       -> applications
       -> audit_logs
@@ -76,19 +81,21 @@ RLS is enabled on all tables. Application and audit writes are restricted to the
 supabase functions deploy assess-application
 supabase functions deploy submit-appeal
 supabase functions deploy update-consent
+supabase functions deploy application-status
+supabase functions deploy list-applications
 ```
 
-The function:
+The assessment function:
 
 1. Validates applicant input.
-2. Calls Claude with a responsible lending system prompt.
-3. Retries transient failures.
+2. Calls Claude with a responsible lending system prompt when an API key is configured.
+3. Retries transient AI failures.
 4. Validates Claude JSON.
-5. Saves the application.
+5. Falls back to a deterministic backend score if AI is unavailable.
 6. Writes an audit log.
-7. Returns the assessment and application id.
+7. Returns the assessment, application id, reference, created time, and status.
 
-`submit-appeal` saves appeal evidence and logs the appeal event. `update-consent` enforces African jurisdiction data sovereignty, upserts authenticated user consent, and logs the update.
+`submit-appeal` verifies the application exists, saves appeal evidence, updates application status, and logs the appeal event. `update-consent` enforces African jurisdiction data sovereignty, upserts authenticated user consent, and logs the update. `application-status` and `list-applications` support status refreshes and operational dashboards.
 
 ## Production Notes
 
@@ -100,10 +107,10 @@ The function:
 
 ## Verification
 
-This workspace did not expose a usable local Node/npm runtime, so the project was generated and statically reviewed here. On a normal development machine, run:
+Run:
 
 ```bash
 npm run build
 ```
 
-Then deploy with your preferred Vite host and Supabase project.
+Then deploy the Vite frontend and Supabase backend to your production projects.
