@@ -231,23 +231,23 @@ function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogi
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-ink">
-      <div className="absolute inset-0 bg-[url('/images/vendor-hero.png')] bg-cover bg-center opacity-90" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-br from-white/92 via-white/70 to-ink/58" aria-hidden="true" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-ink/55 to-transparent" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[url('/images/vendor-hero.png')] bg-cover bg-center opacity-65" aria-hidden="true" />
+      <div className="absolute inset-0 bg-ink/72" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-br from-ink/35 via-ink/58 to-ink/88" aria-hidden="true" />
 
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-5 py-5 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex items-center justify-between gap-4 rounded-panel border border-white/30 bg-white/92 px-3 py-2 shadow-soft backdrop-blur-xl">
           <Logo />
           <Badge tone="green"><BadgeCheck size={14} /> Verified Kenya fintech</Badge>
         </header>
 
-        <section className="grid flex-1 items-center gap-8 py-8 lg:grid-cols-[0.88fr_1fr] lg:gap-12">
-          <Card className="order-1 mx-auto w-full max-w-lg border-white/65 bg-white/96 shadow-2xl shadow-ink/20 backdrop-blur-xl lg:order-none">
+        <section className="flex flex-1 items-center justify-center py-8">
+          <Card className="mx-auto w-full max-w-xl border-white/75 bg-white/98 shadow-2xl shadow-ink/30 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <Badge tone="ink">Secure access required</Badge>
                 <h1 className="mt-4 text-3xl font-semibold leading-tight text-ink sm:text-4xl">Login to Imara Capital</h1>
-                <p className="mt-2 text-sm leading-6 text-muted">Choose Login or Create Account to access your protected loan dashboard.</p>
+                <p className="mt-2 text-sm leading-6 text-muted">Sign in or create an account before accessing the protected loan dashboard.</p>
               </div>
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-card bg-primary-light text-primary-dark"><Lock size={22} /></div>
             </div>
@@ -273,17 +273,6 @@ function LoginScreen({ login, setLogin, onSuccess }: { login: LoginForm; setLogi
               <span className="inline-flex items-center gap-2 font-semibold"><BadgeCheck size={16} /> Verified reviews</span>
             </div>
           </Card>
-
-          <div className="order-2 text-ink drop-shadow-[0_1px_0_rgba(255,255,255,0.65)] lg:order-none">
-            <Badge tone="amber">Mobile-first credit access</Badge>
-            <h2 className="mt-5 max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">A secure place to request funding with confidence.</h2>
-            <p className="mt-5 max-w-xl text-base leading-8 text-ink/75 md:text-lg">Imara Capital helps Kenyan entrepreneurs apply for loans, track review progress, and understand decisions before accepting any terms.</p>
-            <div className="mt-7 grid max-w-3xl gap-4 sm:grid-cols-3">
-              <Feature icon={Smartphone} title="M-Pesa aware" text="Cash-flow summaries support informal businesses." />
-              <Feature icon={ShieldCheck} title="Consent led" text="Built around privacy and Kenya DPA controls." />
-              <Feature icon={CalendarClock} title="Fast review" text="Human review is available for sensitive cases." />
-            </div>
-          </div>
         </section>
       </div>
     </main>
