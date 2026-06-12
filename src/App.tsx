@@ -333,11 +333,11 @@ function Home({ setPage, installApp }: { setPage: (page: Page) => void; installA
               ))}
             </div>
           </div>
-          <div className="p-5 text-white md:p-7 lg:p-8">
-            <div className="rounded-panel border border-white/40 bg-ink/88 p-4 shadow-soft backdrop-blur">
+          <div className="p-5 md:p-7 lg:p-8">
+            <div className="rounded-panel border border-white/70 bg-white/92 p-4 text-ink shadow-soft backdrop-blur-xl">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm text-white/65">Live application preview</p>
+                  <p className="text-sm text-muted">Live application preview</p>
                   <h3 className="mt-1 text-2xl font-semibold">Amina Wanjiku</h3>
                 </div>
                 <Badge>Eligible</Badge>
@@ -363,12 +363,12 @@ function Home({ setPage, installApp }: { setPage: (page: Page) => void; installA
                   <div className="grid h-10 w-10 place-items-center rounded-input bg-primary text-white"><Smartphone size={19} /></div>
                   <div>
                     <p className="text-sm font-semibold">M-Pesa receipts verified</p>
-                    <p className="text-xs text-white/60">Repeat supplier payments detected</p>
+                    <p className="text-xs text-muted">Repeat supplier payments detected</p>
                   </div>
                 </div>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-white/70">
-                {["ID check", "Fairness", "Review"].map((item) => <div key={item} className="rounded-input bg-white/[0.08] px-2 py-3">{item}</div>)}
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold text-muted">
+                {["ID check", "Fairness", "Review"].map((item) => <div key={item} className="rounded-input bg-surface-secondary px-2 py-3">{item}</div>)}
               </div>
             </div>
           </div>
@@ -415,7 +415,7 @@ function MobileBottomNav({ page, setPage }: { page: Page; setPage: (page: Page) 
 }
 
 function VisualMetric({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-card border border-white/10 bg-white/[0.06] p-4"><p className="text-xs text-white/60">{label}</p><p className="mt-2 text-lg font-semibold">{value}</p></div>;
+  return <div className="rounded-card border border-border bg-surface-secondary p-4"><p className="text-xs text-muted">{label}</p><p className="mt-2 text-lg font-semibold text-ink">{value}</p></div>;
 }
 
 function LoanApplication() {
