@@ -299,7 +299,7 @@ function MarketingScreen({ onLogin }: { onLogin: () => void }) {
           <div className="mx-auto max-w-3xl">
             <Badge tone="green">For platforms, SACCOs, MFIs and distributors</Badge>
             <h2 className="mt-5 text-3xl font-semibold leading-tight text-white sm:text-4xl">Become an embedded credit partner.</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">Offer your merchants responsible inventory and working-capital credit inside the channels they already trust, with consent-led data handling and human review built in.</p>
+            <p className="mx-auto mt-4 max-w-2xl text-sm font-medium leading-7 text-white/90 sm:text-base">Offer your merchants responsible inventory and working-capital credit inside the channels they already trust, with consent-led data handling and human review built in.</p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <button type="button" onClick={onLogin} className="inline-flex items-center gap-2 rounded-input bg-primary px-5 py-3 font-semibold text-white shadow-soft hover:bg-primary-dark">
                 Partner login <ArrowRight size={18} />
@@ -312,7 +312,7 @@ function MarketingScreen({ onLogin }: { onLogin: () => void }) {
               {partnerMetrics.map(([title, text]) => (
                 <div key={title} className="rounded-card border border-white/15 bg-white/10 p-4 backdrop-blur">
                   <p className="font-semibold text-white">{title}</p>
-                  <p className="mt-2 text-sm leading-6 text-white/72">{text}</p>
+                  <p className="mt-2 text-sm font-medium leading-6 text-white/85">{text}</p>
                 </div>
               ))}
             </div>
