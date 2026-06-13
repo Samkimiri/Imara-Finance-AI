@@ -218,11 +218,22 @@ function MarketingScreen({ onLogin }: { onLogin: () => void }) {
     ["Understand every decision", "See the recommendation, fairness checks, and review path before accepting terms.", ShieldCheck],
     ["Human support included", "Sensitive or low-confidence cases can move into officer review instead of a blind decline.", Users]
   ];
+  const partnerMetrics = [
+    ["Merchant-ready", "Credit journeys can be embedded beside vendor onboarding and repayment workflows."],
+    ["Audit-first", "Every recommendation carries consent, fairness, and review evidence for oversight."],
+    ["Built for Kenya", "Designed for SACCO, MFI, distributor, and platform operations across all counties."]
+  ];
   const faq = [
     ["Who can use Imara Capital?", "Kenyan entrepreneurs, market vendors, farmers, and small businesses looking for responsible working-capital loans."],
     ["Do I need formal payslips?", "No. The platform is designed to support informal and semi-formal businesses using business details, M-Pesa summaries, and repayment context."],
     ["Is approval automatic?", "No. AI helps prepare a recommendation, but fairness controls, consent rules, and human review are part of the workflow."],
     ["What happens after I log in?", "You can complete a loan application, review the assessment, refresh your status, and request support if more context is needed."]
+  ];
+  const partnerFaq = [
+    ["Which partners is this designed for?", "SACCOs, MFIs, merchant platforms, distributors, and ecosystem builders that want responsible working-capital access inside an existing business channel."],
+    ["Can we keep human approval in the loop?", "Yes. Imara is structured around configurable review thresholds, appeal workflows, and audit logs rather than fully autonomous loan decisions."],
+    ["What data controls are available?", "Consent capture, African jurisdiction controls, audit history, and Kenya Data Protection Act-aligned processing are part of the operating model."],
+    ["How does integration start?", "A partner team can begin with assisted intake, then move toward API-backed application submission, status refreshes, and portfolio monitoring."]
   ];
 
   return (
@@ -276,23 +287,74 @@ function MarketingScreen({ onLogin }: { onLogin: () => void }) {
         ))}
       </section>
 
-      <section id="faq" className="mx-auto max-w-4xl px-5 pb-12 sm:px-6 lg:px-8">
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <Badge tone="blue">FAQ</Badge>
-            <h2 className="mt-3 text-3xl font-semibold">Questions before you log in</h2>
+      <section className="mx-auto max-w-7xl px-5 pb-10 sm:px-6 lg:px-8">
+        <div
+          className="relative overflow-hidden rounded-panel border border-ink/10 bg-ink px-6 py-14 text-center shadow-soft sm:px-10"
+          style={{
+            backgroundImage: "linear-gradient(90deg, rgba(7,17,31,0.91) 0%, rgba(7,17,31,0.78) 48%, rgba(38,57,0,0.7) 100%), url('/images/partners-hero.png')",
+            backgroundPosition: "center",
+            backgroundSize: "cover"
+          }}
+        >
+          <div className="mx-auto max-w-3xl">
+            <Badge tone="green">For platforms, SACCOs, MFIs and distributors</Badge>
+            <h2 className="mt-5 text-3xl font-semibold leading-tight text-white sm:text-4xl">Become an embedded credit partner.</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">Offer your merchants responsible inventory and working-capital credit inside the channels they already trust, with consent-led data handling and human review built in.</p>
+            <div className="mt-7 flex flex-wrap justify-center gap-3">
+              <button type="button" onClick={onLogin} className="inline-flex items-center gap-2 rounded-input bg-primary px-5 py-3 font-semibold text-white shadow-soft hover:bg-primary-dark">
+                Partner login <ArrowRight size={18} />
+              </button>
+              <a href="#partner-faq" className="inline-flex items-center gap-2 rounded-input border border-white/30 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur hover:bg-white/20">
+                Partnership FAQs
+              </a>
+            </div>
+            <div className="mt-8 grid gap-3 text-left sm:grid-cols-3">
+              {partnerMetrics.map(([title, text]) => (
+                <div key={title} className="rounded-card border border-white/15 bg-white/10 p-4 backdrop-blur">
+                  <p className="font-semibold text-white">{title}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/72">{text}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <button type="button" onClick={onLogin} className="inline-flex items-center justify-center gap-2 rounded-input bg-ink px-4 py-3 font-semibold text-white hover:bg-primary-dark">
-            Login and continue <LogIn size={17} />
-          </button>
         </div>
-        <div className="space-y-3">
-          {faq.map(([question, answer]) => (
-            <details key={question} className="rounded-card border border-border bg-surface p-5 shadow-soft">
-              <summary className="cursor-pointer font-semibold text-ink">{question}</summary>
-              <p className="mt-3 text-sm leading-6 text-muted">{answer}</p>
-            </details>
-          ))}
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-6 px-5 pb-12 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <div id="faq" className="scroll-mt-6">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <Badge tone="blue">FAQ</Badge>
+              <h2 className="mt-3 text-3xl font-semibold">Questions before you log in</h2>
+            </div>
+            <button type="button" onClick={onLogin} className="inline-flex items-center justify-center gap-2 rounded-input bg-ink px-4 py-3 font-semibold text-white hover:bg-primary-dark">
+              Login and continue <LogIn size={17} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {faq.map(([question, answer]) => (
+              <details key={question} className="rounded-card border border-border bg-surface p-5 shadow-soft">
+                <summary className="cursor-pointer font-semibold text-ink">{question}</summary>
+                <p className="mt-3 text-sm leading-6 text-muted">{answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        <div id="partner-faq" className="scroll-mt-6">
+          <div className="mb-5">
+            <Badge tone="green">Partner FAQ</Badge>
+            <h2 className="mt-3 text-3xl font-semibold">Embedded credit partnerships</h2>
+            <p className="mt-3 text-sm leading-6 text-muted">Operational answers for organizations that want to bring Imara Capital into a trusted merchant, member, or supplier channel.</p>
+          </div>
+          <div className="space-y-3">
+            {partnerFaq.map(([question, answer]) => (
+              <details key={question} className="rounded-card border border-border bg-surface p-5 shadow-soft">
+                <summary className="cursor-pointer font-semibold text-ink">{question}</summary>
+                <p className="mt-3 text-sm leading-6 text-muted">{answer}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
     </main>
