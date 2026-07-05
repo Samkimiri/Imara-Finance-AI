@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import {
   Activity, ArrowRight, BadgeCheck, Banknote, Building2, CalendarClock, CheckCircle2, ChevronLeft, ChevronRight,
   FileText, Gauge, History, IdCard, Landmark, Lock, LogIn, LogOut, Mail, Menu, Phone, Scale, Search,
@@ -761,10 +760,41 @@ function Overview() {
     ["Women-Owned Businesses", "11,860", BadgeCheck],
     ["SME Working Capital", "KES 184M", ShieldCheck]
   ];
+  const maxApplications = Math.max(...segmentData.map((segment) => segment.applications));
   return <div className="space-y-5">
     <div className="grid gap-4 md:grid-cols-4">{metrics.map(([label, value, tone]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-3 text-3xl font-semibold"><Count value={value} suffix={label.includes("Score") ? "%" : ""} /></p><Badge tone={tone}>Live monitored</Badge></Card>)}</div>
     <div className="grid gap-5 lg:grid-cols-5">
-      <Card className="lg:col-span-3"><h2 className="font-semibold">Borrower Segment Distribution</h2><div className="mt-4 h-80"><ResponsiveContainer><BarChart data={segmentData} layout="vertical" margin={{ left: 24 }}><CartesianGrid stroke="#eef0f2" /><XAxis type="number" /><YAxis dataKey="name" type="category" width={150} /><Tooltip /><Bar dataKey="applications" fill="#1D9E75" radius={[0, 8, 8, 0]} /></BarChart></ResponsiveContainer></div></Card>
+      <Card className="lg:col-span-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="font-semibold">Borrower Segment Distribution</h2>
+            <p className="mt-1 text-sm text-muted">Applications by primary business segment</p>
+          </div>
+          <Badge tone="green">{segmentData.reduce((sum, segment) => sum + segment.applications, 0).toLocaleString()} total</Badge>
+        </div>
+        <div className="mt-6 space-y-5">
+          {segmentData.map((segment) => {
+            const width = `${Math.max(10, (segment.applications / maxApplications) * 100)}%`;
+            return (
+              <div key={segment.name}>
+                <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+                  <span className="font-medium">{segment.name}</span>
+                  <span className="text-muted">{segment.applications.toLocaleString()}</span>
+                </div>
+                <div className="h-4 overflow-hidden rounded-full bg-surface-secondary">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    className="h-full rounded-full bg-primary shadow-[inset_0_-1px_0_rgba(0,0,0,0.12)]"
+                    aria-label={`${segment.name}: ${segment.applications} applications`}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
       <Card className="lg:col-span-2"><h2 className="font-semibold">Kenya Portfolio Impact</h2><div className="mt-4 grid gap-3 sm:grid-cols-2">{impact.map(([label, value, Icon]) => <div key={label} className="rounded-card border border-border p-4"><Icon className="text-primary" size={20} /><p className="mt-4 text-sm text-muted">{label}</p><p className="mt-1 font-semibold">{value}</p></div>)}</div></Card>
     </div>
   </div>;

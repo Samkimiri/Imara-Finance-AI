@@ -8,9 +8,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          charts: ["recharts"],
-          motion: ["framer-motion"],
-          supabase: ["@supabase/supabase-js"]
+          motion: ["framer-motion"]
         }
       }
     }
