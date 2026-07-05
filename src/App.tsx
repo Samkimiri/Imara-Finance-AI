@@ -461,6 +461,12 @@ function Navigation({ page, setPage, collapsed = false }: { page: Page; setPage:
 
 function Home({ setPage, installApp }: { setPage: (page: Page) => void; installApp: () => void }) {
   const stats = [["Loan Range", "KES 5k - 500k"], ["Coverage", "47 Counties"], ["Approval Rate", "68%"], ["Review", "Same day"]];
+  const readiness = [
+    ["Decision SLA", "18 min", "Median time from completed application to recommendation.", Gauge, "green"],
+    ["Human Review Queue", "86 cases", "Escalated files are prioritized by confidence, fairness, and exposure.", Users, "amber"],
+    ["Compliance Evidence", "100%", "Consent, audit, and Kenya DPA checkpoints are attached to every decision.", ShieldCheck, "blue"],
+    ["Disbursement Readiness", "KES 42M", "Available partner liquidity reserved for approved SME working capital.", WalletCards, "ink"]
+  ] as const;
   const flow = [
     ["Apply", "Tell us about the business", FileText],
     ["Verify", "Confirm ID and cash flow", ShieldCheck],
@@ -540,6 +546,31 @@ function Home({ setPage, installApp }: { setPage: (page: Page) => void; installA
       </section>
 
       <div className="grid gap-4 md:grid-cols-4">{stats.map(([label, value]) => <Card key={label}><p className="text-sm text-muted">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Card>)}</div>
+
+      <section className="rounded-panel border border-border bg-ink p-5 text-white shadow-soft md:p-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <Badge tone="amber">Executive readiness</Badge>
+            <h3 className="mt-3 text-2xl font-semibold">Operational signals for lending teams</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">A concise view of speed, governance, and funding readiness before portfolio teams move applications into production workflows.</p>
+          </div>
+          <button type="button" onClick={() => setPage("agents")} className="inline-flex items-center justify-center gap-2 rounded-input border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur hover:bg-white/15">
+            Review operations <ArrowRight size={16} />
+          </button>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-4">
+          {readiness.map(([label, value, text, Icon, tone]) => (
+            <div key={label} className="rounded-card border border-white/12 bg-white/[0.07] p-4 backdrop-blur">
+              <div className="flex items-start justify-between gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-input bg-white/10 text-white"><Icon size={18} /></div>
+                <Badge tone={tone}>{value}</Badge>
+              </div>
+              <p className="mt-4 font-semibold">{label}</p>
+              <p className="mt-2 text-sm leading-6 text-white/70">{text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
         <Card>
